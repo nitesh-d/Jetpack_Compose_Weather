@@ -15,7 +15,8 @@ class WeatherViewModel : ViewModel() {
 
     private val weatherApi = RetrofitInstance.weatherApi
     private val weatherData = MutableLiveData<NetworkResponse<WeatherData>>()
-  val weatherResult: LiveData<NetworkResponse<WeatherData>> = weatherData
+    val weatherResult: LiveData<NetworkResponse<WeatherData>> = weatherData
+
     fun getData(city: String) {
 
         weatherData.value = NetworkResponse.Loading
@@ -35,4 +36,5 @@ class WeatherViewModel : ViewModel() {
                 weatherData.value = NetworkResponse.Error("Failed to load data")
             }
         }
-    }}
+    }
+}

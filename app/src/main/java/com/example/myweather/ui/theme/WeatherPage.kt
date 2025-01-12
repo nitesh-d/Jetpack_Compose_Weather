@@ -69,7 +69,7 @@ fun WeatherPage(viewModel: WeatherViewModel) {
                 modifier = Modifier.weight(1f),
                 value = city,
                 onValueChange = { city = it },
-                label = { Text("Search for any location") },
+                label = { Text("Search for any location", color = Color.Black) },
 
                 )
 

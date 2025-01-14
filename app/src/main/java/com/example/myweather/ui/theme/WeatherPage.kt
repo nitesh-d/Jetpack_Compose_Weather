@@ -2,6 +2,7 @@ package com.example.myweather.ui.theme
 
 import android.media.Image
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
@@ -41,6 +43,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.example.myweather.R
 import com.example.myweather.api.NetworkResponse
 import com.example.myweather.api.WeatherData
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
@@ -48,10 +51,20 @@ import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 @Composable
 fun WeatherPage(viewModel: WeatherViewModel) {
+
+
     var city by remember { mutableStateOf("") }
 
     val weatherResult = viewModel.weatherResult.observeAsState()
     val keyboardController = LocalSoftwareKeyboardController.current
+    var backgroundImageRes by remember { mutableStateOf(R.drawable.clear) }
+    Image(
+        painter = painterResource(id = backgroundImageRes),
+        contentDescription = null,
+        modifier = Modifier.fillMaxWidth(),
+        contentScale = ContentScale.Crop
+    )
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -94,6 +107,23 @@ fun WeatherPage(viewModel: WeatherViewModel) {
             }
 
             is NetworkResponse.Success -> {
+                val condition = result.data.current.condition.text
+                backgroundImageRes = when (condition.lowercase()) {
+                    "sunny" -> R.drawable.sunny
+                    "overcast" -> R.drawable.overcast
+                    "rainy" -> R.drawable.rain
+                    "cloudy" -> R.drawable.mist
+                    "mist" -> R.drawable.mist
+                    "fog" -> R.drawable.mist
+                    "light snow" -> R.drawable.snow
+                    "snow" -> R.drawable.snow
+                    "partly cloudy" -> R.drawable.partyly
+                    "pathcy rain nearby" -> R.drawable.rain
+                    "light rain shower" -> R.drawable.rain
+                    "light rain" -> R.drawable.rain
+                    "moderate rain at times" -> R.drawable.rain
+                    else -> R.drawable.clear
+                }
                 WeatherItem(data = result.data)
 
             }
@@ -106,6 +136,7 @@ fun WeatherPage(viewModel: WeatherViewModel) {
 
 @Composable
 fun WeatherItem(data: WeatherData) {
+
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
 
         Row(
@@ -116,9 +147,9 @@ fun WeatherItem(data: WeatherData) {
             Spacer(modifier = Modifier.padding(5.dp))
 
 
-            Text(text = "${data.location.name}, ", fontSize = 20.sp)
-           // Text(text = "${data.location.region}, ", fontSize = 20.sp)
-            Text(text = "${data.location.country}", fontSize = 20.sp)
+            Text(text = "${data.location.name}, ", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            // Text(text = "${data.location.region}, ", fontSize = 20.sp)
+            Text(text = "${data.location.country}", fontSize = 20.sp, fontWeight = FontWeight.Bold)
 
         }
 
@@ -135,12 +166,32 @@ fun WeatherItem(data: WeatherData) {
             model = "https:${data.current.condition.icon}".replace("64x64", "128x128"),
             contentDescription = "Image"
         )
-        Text(
-            text = "${data.current.condition.text}",
-            fontSize = 50.sp,
-            fontWeight = FontWeight.Bold,
-            fontStyle = FontStyle.Italic,
-            color = Color.DarkGray
+
+        var condition by remember { mutableStateOf("") }
+        condition = data.current.condition.text
+
+        Card(modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+            shape = RoundedCornerShape(16.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = Color.White.copy(alpha = 0.2f) // Adjust alpha for transparency
+            ),
+            content = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = condition,
+                        fontSize = 25.sp,
+                        fontWeight = FontWeight.Bold,
+                        //color = Color.DarkGray
+                    )
+                }
+            }
         )
 
         Card(
@@ -152,20 +203,26 @@ fun WeatherItem(data: WeatherData) {
             elevation = CardDefaults.cardElevation(
                 defaultElevation = 10.dp
             ),
-
+            colors = CardDefaults.cardColors(
+                containerColor = Color.White.copy(alpha = 0.3f) // Adjust alpha for transparency
+            ),
             content = {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceAround
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.SpaceAround) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.SpaceAround
+                    ) {
                         moreWeatherDetails("Wind Speed", "${data.current.wind_kph} km/h")
                         moreWeatherDetails("UV", "${data.current.uv}")
                     }
-                    Column(horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.SpaceAround) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.SpaceAround
+                    ) {
                         moreWeatherDetails("Feels like", "${data.current.feelslike_c}°C")
                         moreWeatherDetails("Humidity", "${data.current.humidity}%")
                     }
@@ -179,15 +236,16 @@ fun WeatherItem(data: WeatherData) {
 
 @Composable
 fun moreWeatherDetails(key: String, value: String) {
- Column( horizontalAlignment = Alignment.CenterHorizontally){
-     Text(
-        value, fontSize = 30.sp,
-        modifier = Modifier.padding(16.dp),
-        style = MaterialTheme.typography.labelLarge
-    )
-    Text(
-        key,
-        modifier = Modifier.padding(horizontal = 16.dp),
-        style = MaterialTheme.typography.labelLarge
-    )
-}}
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            value, fontSize = 30.sp,
+            modifier = Modifier.padding(16.dp),
+            style = MaterialTheme.typography.labelLarge
+        )
+        Text(
+            key,
+            modifier = Modifier.padding(horizontal = 16.dp),
+            style = MaterialTheme.typography.labelLarge
+        )
+    }
+}

@@ -118,8 +118,9 @@ fun WeatherPage(viewModel: WeatherViewModel) {
                     "light snow" -> R.drawable.snow
                     "snow" -> R.drawable.snow
                     "partly cloudy" -> R.drawable.partyly
-                    "pathcy rain nearby" -> R.drawable.rain
+                    "patchy rain nearby" -> R.drawable.rain
                     "light rain shower" -> R.drawable.rain
+                    "light drizzle" -> R.drawable.rain
                     "light rain" -> R.drawable.rain
                     "moderate rain at times" -> R.drawable.rain
                     else -> R.drawable.clear

@@ -161,7 +161,7 @@ fun WeatherItem(data: WeatherData) {
         )
 
         AsyncImage(
-            modifier = Modifier.size(300.dp),
+            modifier = Modifier.size(200.dp),
 
             model = "https:${data.current.condition.icon}".replace("64x64", "128x128"),
             contentDescription = "Image"

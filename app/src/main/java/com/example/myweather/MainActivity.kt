@@ -17,6 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
+import com.example.myweather.domain.PreferenceManager
 import com.example.myweather.ui.theme.MyWeatherTheme
 import com.example.myweather.ui.theme.WeatherPage
 import com.example.myweather.ui.theme.WeatherViewModel
@@ -25,7 +26,11 @@ import com.example.myweather.ui.theme.WeatherViewModel
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val weatherViewModel = ViewModelProvider(this)[WeatherViewModel::class.java]
+        val preferenceManager = PreferenceManager(applicationContext)
+        val weatherViewModel = WeatherViewModel(preferenceManager)
+
+
+        //val weatherViewModel = ViewModelProvider(this)[WeatherViewModel::class.java]
         //enableEdgeToEdge()
 
         setContent {

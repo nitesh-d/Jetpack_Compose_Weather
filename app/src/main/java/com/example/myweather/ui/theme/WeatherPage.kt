@@ -1,9 +1,12 @@
 package com.example.myweather.ui.theme
 
+import android.content.Context
 import android.media.Image
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
@@ -21,9 +26,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -38,6 +46,8 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -46,14 +56,20 @@ import coil3.compose.AsyncImage
 import com.example.myweather.R
 import com.example.myweather.api.NetworkResponse
 import com.example.myweather.api.WeatherData
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
+import com.example.myweather.domain.PreferenceManager
+
 
 
 @Composable
 fun WeatherPage(viewModel: WeatherViewModel) {
-
+    val weatherData by viewModel.weatherResult.observeAsState()
+    val selectedCity by viewModel.selectedCity.collectAsState()
 
     var city by remember { mutableStateOf("") }
+
+    LaunchedEffect(selectedCity) {
+        city = selectedCity ?: "" // If no city is stored, default to an empty string
+    }
 
     val weatherResult = viewModel.weatherResult.observeAsState()
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -78,17 +94,36 @@ fun WeatherPage(viewModel: WeatherViewModel) {
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Box(
+                modifier = Modifier.weight(1f)
+                    .background(Color(0x40000000), shape = RoundedCornerShape(8.dp)) // Set background color and shape
+                    .padding(4.dp) // Add padding to prevent content overlap with the border
+            ) {
             OutlinedTextField(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.fillMaxWidth(),
                 value = city,
                 onValueChange = { city = it },
                 label = { Text("Search for any location", color = Color.Black) },
-
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text, // Standard text keyboard
+                    imeAction = ImeAction.Search       // Display Search action on the keyboard
+                ),
+                keyboardActions = KeyboardActions(
+                    onSearch = {
+                        // Handle the Search action
+                        if (city.isNotEmpty()) {
+                            viewModel.updateCity(city) // Save the city and fetch data
+                        }
+                        keyboardController?.hide() // Dismiss the keyboard
+                    }
                 )
-
+                )
+            }
             IconButton(onClick = {
                 viewModel.getData(city)
                 keyboardController?.hide()
+                viewModel.updateCity(city)
+                Log.d("Nick", "Icon button Clicked")
             }) {
                 Icon(
                     imageVector = Icons.Default.Search,

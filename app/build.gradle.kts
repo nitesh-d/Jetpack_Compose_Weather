@@ -61,4 +61,5 @@ dependencies {
     implementation("androidx.compose.runtime:runtime-livedata:1.7.6")
     implementation("io.coil-kt.coil3:coil-compose:3.0.4")
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.0.4")
+    implementation("androidx.datastore:datastore-preferences:1.0.0") // For DataSto
 }
